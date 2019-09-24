@@ -6,4 +6,3 @@ def flat_list(array):
         else:
             flat.append(i)
     return flat
-
