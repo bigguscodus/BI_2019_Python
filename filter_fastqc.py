@@ -9,6 +9,7 @@ parser.add_argument("--fastq", required=True, help="Path to fastq file for filte
 parser.add_argument("--output_base_name", help="Prefix for names of the created files")
 args = parser.parse_args()
 
+
 def _check_gc_content(read: list, minimum: int, maximum: int):
     """Filter by GC content. Including soft masking fastqc"""
     gc_percent = 100 * (read[1].count("G") + read[1].count("g") + read[1].count("C") + read[1].count("c")) / len(
@@ -22,6 +23,8 @@ def _check_length(read: list, threshhold: int):
     if len(read[1]) > threshhold:
         return True
     return False
+
+
 def filter_fastqc(file=args.fastq, gc_content_bounds=args.gc_bounds):
     """Filter fastqc file with help of two utility functions. Side effect : write 2 files"""
     if gc_content_bounds is not None:
@@ -39,4 +42,29 @@ def filter_fastqc(file=args.fastq, gc_content_bounds=args.gc_bounds):
         data = [line.strip() for line in data]
         data_by_read = [data[index:index + 4] for index in
                         range(0, len(data), 4)]  # make sublists from list. One sublist - one read
-    print(data_by_read)
+        passed_reads = []
+        failed_reads = []
+        for read in data_by_read:
+            if _check_length(read=read, threshhold=10) and _check_gc_content(read, minimum=gc_content_bounds[0],
+                                                                             maximum=gc_content_bounds[1]):
+                passed_reads.append(read)
+            else:
+                if args.keep_filtered:
+                    failed_reads.append(read)
+
+    if args.output_base_name is not None:
+        output_name = args.output_base_name
+    else:
+        output_name = "some_file"
+    if args.keep_filtered:
+        with open(output_name + "_failed.fastq", "w") as failed:
+            for read in failed_reads:
+                for line in read:
+                    failed.write(line + "\n")
+    with open(output_name + "_passed.fastq", "w") as passed:
+        for read in passed_reads:
+            for line in read:
+                passed.write(line + "\n")
+
+
+filter_fastqc()
