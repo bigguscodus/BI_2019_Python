@@ -22,5 +22,21 @@ def _check_length(read: list, threshhold: int):
     if len(read[1]) > threshhold:
         return True
     return False
-
-filter_fastqc()
+def filter_fastqc(file=args.fastq, gc_content_bounds=args.gc_bounds):
+    """Filter fastqc file with help of two utility functions. Side effect : write 2 files"""
+    if gc_content_bounds is not None:
+        gc_content_bounds = [int(bound) for bound in gc_content_bounds]
+        if len(gc_content_bounds) == 1 and 0 <= gc_content_bounds[0] <= 100:
+            gc_content_bounds.append(100)
+        elif len(gc_content_bounds) == 2 and 0 <= gc_content_bounds[0] <= 100 and 0 <= gc_content_bounds[1] <= 100:
+            pass
+        else:
+            raise Exception("Check gc_bounds parametr input")
+    if gc_content_bounds is None:
+        gc_content_bounds = [0, 100]
+    with open(file, "r") as file:
+        data = file.readlines()
+        data = [line.strip() for line in data]
+        data_by_read = [data[index:index + 4] for index in
+                        range(0, len(data), 4)]  # make sublists from list. One sublist - one read
+    print(data_by_read)
