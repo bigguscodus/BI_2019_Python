@@ -1,6 +1,5 @@
 import argparse
 import secondary_functions as sf
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--min_length", type=int,
                     help="minimum  length for the  read")
@@ -8,21 +7,20 @@ parser.add_argument("--keep_filtered", action='store_true', help="if --keep_filt
 parser.add_argument("--gc_bounds", nargs="+", help="Enter minimum/maximum/nothing/minimum and maximum for GC content")
 parser.add_argument("--fastq", required=True, help="Path to fastq file for filtering")
 parser.add_argument("--output_base_name", help="Prefix for names of the created files")
-parser.add_argument("--crop", help="Cut bases off the end of a read, if below a threshold quality")
-parser.add_argument("--headcrop", help="Cut the specified number of bases from the start of the read")
-parser.add_argument("--leading", help="Cut bases off the start of a read, if below a threshold quality")
-parser.add_argument("--trailing", help="Cut bases off the end of a read, if below a threshold quality")
+parser.add_argument("--crop", help = "Cut bases off the end of a read, if below a threshold quality")
+parser.add_argument("--headcrop", help = "Cut the specified number of bases from the start of the read")
+parser.add_argument("--leading", help = "Cut bases off the start of a read, if below a threshold quality")
+parser.add_argument("--trailing", help = "Cut bases off the end of a read, if below a threshold quality")
 args = parser.parse_args()
-
-
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
 
 def filter_fastqc(file=args.fastq,
                   min_length=args.min_length,
@@ -46,16 +44,13 @@ def filter_fastqc(file=args.fastq,
     passed_reads = []
     failed_reads = []
     for read in data_by_read:
-        if sf._check_length(read=read, threshhold=min_length) and sf._check_gc_content(read,
-                                                                                       minimum=gc_content_bounds[0],
-                                                                                       maximum=gc_content_bounds[1]):
+        if sf._check_length(read=read, threshhold=min_length) and sf._check_gc_content(read, minimum=gc_content_bounds[0],
+                                                                                 maximum=gc_content_bounds[1]):
             passed_reads.append(read)
         else:
             if args.keep_filtered:
                 failed_reads.append(read)
-    print(
-        f"{bcolors.FAIL}{total_len_reads - len(passed_reads)} reads dropped by length and gc content filter{bcolors.ENDC}")
-    print(passed_reads)
+    print(f"{bcolors.FAIL}{total_len_reads-len(passed_reads)} reads dropped by length and gc content filter{bcolors.ENDC}")
     for read in passed_reads:
         read = sf._crop(read, crop)
         read = sf._headcrop(read, headcrop)
@@ -74,6 +69,11 @@ def filter_fastqc(file=args.fastq,
         for read in passed_reads:
             for line in read:
                 passed.write(line + "\n")
+
+
+if __name__ == "__main__":
+    filter_fastqc()
+
 
 
 if __name__ == "__main__":
