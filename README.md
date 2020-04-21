@@ -1,4 +1,4 @@
-# BI_2019_Python
-Данный репозиторий содержит скрипт calculator.py в ветке first_homework.
-В ветке second_homework лежит тотже скрипт, оформленный по PEP-8.
-В ветке third_homework лежит скрипт flat.py - возвращающий плоский лист и non_uniq.py, возвращающий лист из неуникальных элементов оригинального листа
+# Trimmer
+This repository is a cosplay on trimmomatic.With this package you can filtr your fastq file by lenght of read, gc content, crop headcrop and so on 
+## Example of usage
+python3 trimmer.py --fastq dummy.fastq --min_length 50 --gc_bounds 40 100 --crop 40
